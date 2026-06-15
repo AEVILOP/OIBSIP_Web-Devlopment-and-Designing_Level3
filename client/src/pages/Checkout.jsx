@@ -11,11 +11,21 @@ const fade = (delay = 0) => ({
   transition: { duration: 0.4, delay },
 });
 
+const GST_RATE = 0.05;
+const PLATFORM_FEE = 10;
+const DELIVERY_THRESHOLD = 499;
+const DELIVERY_CHARGE = 40;
+
 export default function Checkout() {
   const { draft, clearDraft } = useCheckout();
   const navigate = useNavigate();
 
-  if (!draft) return <Navigate to="/dashboard" replace />;
+  if (!draft) return <Navigate to="/menu" replace />;
+
+  const subtotal = draft.total;
+  const gstAmount = Math.round(subtotal * GST_RATE * 100) / 100;
+  const delivery = subtotal >= DELIVERY_THRESHOLD ? 0 : DELIVERY_CHARGE;
+  const grandTotal = Math.round((subtotal + gstAmount + PLATFORM_FEE + delivery) * 100) / 100;
 
   const complete = (order) => {
     clearDraft();
@@ -52,19 +62,69 @@ export default function Checkout() {
         </motion.section>
 
         <motion.aside className="glass-card h-fit p-7 lg:sticky lg:top-20" {...fade(0.15)}>
-          <h2 className="font-display text-xl font-bold">Order summary</h2>
-          <div className="mt-6 space-y-4 text-sm">
-            <div className="flex justify-between text-muted"><span>Pizza</span><span>{money(draft.total)}</span></div>
-            <div className="flex justify-between text-muted"><span>Delivery</span><span className="font-semibold text-success">Free</span></div>
-            <div className="flex justify-between border-t border-line pt-4 font-display text-xl font-bold">
-              <span>Total</span><span className="text-amber">{money(draft.total)}</span>
+          {/* Invoice Header */}
+          <div className="flex items-center justify-between">
+            <h2 className="font-display text-xl font-bold">Bill Summary</h2>
+            <span className="rounded-full bg-fire/10 px-3 py-1 text-xs font-bold text-amber">TAX INVOICE</span>
+          </div>
+
+          <div className="mt-6 space-y-3 text-sm">
+            {/* Item Price */}
+            <div className="flex justify-between text-muted">
+              <span>Item Total</span>
+              <span>{money(subtotal)}</span>
             </div>
+
+            {/* GST */}
+            <div className="flex justify-between text-muted">
+              <span>GST (5%)</span>
+              <span>{money(gstAmount)}</span>
+            </div>
+
+            {/* Platform Fee */}
+            <div className="flex justify-between text-muted">
+              <span>Platform Fee</span>
+              <span>{money(PLATFORM_FEE)}</span>
+            </div>
+
+            {/* Delivery */}
+            <div className="flex justify-between text-muted">
+              <span>Delivery</span>
+              {delivery === 0 ? (
+                <span className="font-semibold text-success">FREE</span>
+              ) : (
+                <span>{money(delivery)}</span>
+              )}
+            </div>
+
+            {/* Free delivery hint */}
+            {delivery > 0 && (
+              <p className="rounded-lg bg-fire/5 px-3 py-2 text-xs text-amber">
+                {`\u{1F4A1} Add ${money(DELIVERY_THRESHOLD - subtotal)} more for free delivery`}
+              </p>
+            )}
+
+            {/* Divider */}
+            <div className="border-t border-line" />
+
+            {/* Grand Total */}
+            <div className="flex justify-between pt-1 font-display text-xl font-bold">
+              <span>To Pay</span>
+              <span className="text-amber">{money(grandTotal)}</span>
+            </div>
+
+            {/* Tax Note */}
+            <p className="text-[11px] text-muted/60">
+              Inclusive of all taxes. GSTIN: 27AXXXX1234X1Z5
+            </p>
           </div>
+
           <div className="mt-7">
-            <RazorpayCheckout orderDetails={draft.orderDetails} total={draft.total} onSuccess={complete} />
+            <RazorpayCheckout orderDetails={draft.orderDetails} total={grandTotal} onSuccess={complete} />
           </div>
+
           <p className="mt-4 text-center text-xs leading-5 text-muted">
-            🔒 Razorpay test mode · No real payment charged
+            🔒 Secured by Razorpay · Test mode — no real charges
           </p>
         </motion.aside>
       </div>

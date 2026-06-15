@@ -94,6 +94,8 @@ export function Login() {
 export function Register() {
   const [form, setForm] = useState({ name: '', email: '', password: '' });
   const [busy, setBusy] = useState(false);
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const strength = (() => {
     const p = form.password;
@@ -113,9 +115,10 @@ export function Register() {
     event.preventDefault();
     setBusy(true);
     try {
-      const { data } = await api.post('/auth/register', form);
-      toast.success(data.message);
-      setForm({ name: '', email: '', password: '' });
+      await api.post('/auth/register', form);
+      const user = await login({ email: form.email, password: form.password });
+      toast.success(`Welcome, ${user.name.split(' ')[0]}! 🍕`);
+      navigate(user.role === 'admin' ? '/admin' : '/menu', { replace: true });
     } catch (error) {
       toast.error(apiError(error, 'Unable to create account'));
     } finally {
