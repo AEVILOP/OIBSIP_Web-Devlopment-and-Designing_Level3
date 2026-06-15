@@ -38,19 +38,15 @@ const register = asyncHandler(async (req, res) => {
     return res.status(409).json({ error: 'An account with this email already exists' });
   }
 
-  const { token, hashedToken } = createOneTimeToken();
-  const user = await User.create({
+  await User.create({
     name,
     email: normalizedEmail,
     password: await bcrypt.hash(password, 12),
     role: normalizedEmail === process.env.ADMIN_EMAIL?.toLowerCase() ? 'admin' : 'user',
-    emailVerificationToken: hashedToken,
-    emailVerificationExpires: Date.now() + 24 * 60 * 60 * 1000,
-    lastVerificationSent: new Date(),
+    isVerified: true,
   });
 
-  await sendVerificationEmail(user, token);
-  return res.status(201).json({ message: 'Check your email to verify your account' });
+  return res.status(201).json({ message: 'Account created successfully! Please log in.' });
 });
 
 const verifyEmail = asyncHandler(async (req, res) => {
@@ -104,12 +100,6 @@ const login = asyncHandler(async (req, res) => {
     .select('+password +refreshToken');
 
   if (!user) return res.status(401).json({ error: 'Invalid email or password' });
-  if (!user.isVerified) {
-    return res.status(403).json({
-      error: 'Please verify your email before logging in',
-      code: 'EMAIL_NOT_VERIFIED',
-    });
-  }
 
   const passwordMatches = await bcrypt.compare(req.body.password, user.password);
   if (!passwordMatches) return res.status(401).json({ error: 'Invalid email or password' });

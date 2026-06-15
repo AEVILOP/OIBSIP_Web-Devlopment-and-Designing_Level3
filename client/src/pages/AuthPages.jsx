@@ -54,7 +54,6 @@ function Field({ label, ...props }) {
 export function Login() {
   const [form, setForm] = useState({ email: '', password: '' });
   const [busy, setBusy] = useState(false);
-  const [needsVerification, setNeedsVerification] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -65,22 +64,12 @@ export function Login() {
     try {
       const user = await login(form);
       toast.success(`Welcome back, ${user.name.split(' ')[0]}`);
-      const fallback = user.role === 'admin' ? '/admin' : '/dashboard';
+      const fallback = user.role === 'admin' ? '/admin' : '/menu';
       navigate(location.state?.from?.pathname || fallback, { replace: true });
     } catch (error) {
-      setNeedsVerification(error.response?.data?.code === 'EMAIL_NOT_VERIFIED');
       toast.error(apiError(error, 'Unable to log in'));
     } finally {
       setBusy(false);
-    }
-  };
-
-  const resend = async () => {
-    try {
-      const { data } = await api.post('/auth/resend-verification', { email: form.email });
-      toast.success(data.message);
-    } catch (error) {
-      toast.error(apiError(error, 'Unable to resend verification'));
     }
   };
 
@@ -97,11 +86,6 @@ export function Login() {
           <Link className="text-sm text-muted hover:text-amber transition-colors" to="/forgot-password">Forgot password?</Link>
         </div>
         <button className="btn-primary w-full" disabled={busy}>{busy ? 'Logging in...' : 'Log in'}</button>
-        {needsVerification && (
-          <button type="button" className="w-full text-sm font-semibold text-amber hover:text-fire transition-colors" onClick={resend}>
-            Resend verification email
-          </button>
-        )}
       </form>
     </AuthShell>
   );
