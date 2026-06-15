@@ -61,10 +61,10 @@ const pizzas = [
 
   // Drinks
   { name: 'Classic Cola', description: 'Chilled 500ml classic cola.', basePrice: 60, image: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=900&q=80', category: 'drink' },
-  { name: 'Lemon-Lime Soda', description: 'Refreshing 500ml citrus soda.', basePrice: 60, image: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=900&q=80', category: 'drink' },
-  { name: 'Orange Soda', description: 'Sweet orange soda, 500ml.', basePrice: 60, image: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=900&q=80', category: 'drink' },
+  { name: 'Lemon-Lime Soda', description: 'Refreshing 500ml citrus soda.', basePrice: 60, image: 'https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?auto=format&fit=crop&w=900&q=80', category: 'drink' },
+  { name: 'Orange Soda', description: 'Sweet orange soda, 500ml.', basePrice: 60, image: 'https://images.unsplash.com/photo-1624517452488-04869289c4ca?auto=format&fit=crop&w=900&q=80', category: 'drink' },
   { name: 'Iced Lemon Tea', description: 'Cold brewed tea with a dash of lemon.', basePrice: 80, image: 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?auto=format&fit=crop&w=900&q=80', category: 'drink' },
-  { name: 'Sparkling Water', description: 'Crisp carbonated water.', basePrice: 50, image: 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?auto=format&fit=crop&w=900&q=80', category: 'drink' },
+  { name: 'Sparkling Water', description: 'Crisp carbonated water.', basePrice: 50, image: 'https://images.unsplash.com/photo-1559839914-17aae19cec71?auto=format&fit=crop&w=900&q=80', category: 'drink' },
 
   // Combos
   { name: 'Couple\'s Combo', description: '2 Medium Pizzas (Veg/Non-Veg) + 2 Soft Drinks + Garlic Bread.', basePrice: 899, image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=900&q=80', category: 'combo' },
@@ -85,12 +85,10 @@ const seedData = async () => {
     console.log(`Seeded ${ingredients.length} ingredients`);
   }
 
-  // Force re-seed to get all 30 items
-  if (pizzaCount < pizzas.length) {
-    await PizzaVariety.deleteMany({});
-    await PizzaVariety.insertMany(pizzas);
-    console.log(`Seeded ${pizzas.length} menu items (pizzas, drinks, combos)`);
-  }
+  // Always re-seed menu items to keep images and data fresh
+  await PizzaVariety.deleteMany({});
+  await PizzaVariety.insertMany(pizzas);
+  console.log(`Seeded ${pizzas.length} menu items (pizzas, drinks, combos)`);
 };
 
 module.exports = seedData;

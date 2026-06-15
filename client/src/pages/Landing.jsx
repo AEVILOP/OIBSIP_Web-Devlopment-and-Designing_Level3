@@ -1,7 +1,10 @@
+import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Page from '../components/Page';
 import PizzaPreview from '../components/PizzaPreview';
+import api from '../utils/axios';
+import { money } from '../utils/format';
 
 const fade = (delay = 0) => ({
   initial: { opacity: 0, y: 24 },
@@ -16,10 +19,103 @@ const features = [
 ];
 
 const stats = [
-  { value: '26', label: 'fresh ingredients' },
-  { value: '8 sec', label: 'status refresh' },
+  { value: '30+', label: 'menu items' },
+  { value: '5 min', label: 'avg delivery' },
   { value: '100%', label: 'your call' },
 ];
+
+function AutoScrollCarousel() {
+  const [pizzas, setPizzas] = useState([]);
+  const scrollRef = useRef(null);
+
+  useEffect(() => {
+    api.get('/catalog/pizzas')
+      .then(({ data }) => {
+        const onlyPizzas = data.pizzas.filter((p) => ['veg', 'non-veg', 'vegan'].includes(p.category));
+        setPizzas(onlyPizzas);
+      })
+      .catch(() => {});
+  }, []);
+
+  // Auto-scroll
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el || pizzas.length === 0) return;
+    let animId;
+    let speed = 0.5;
+    const scroll = () => {
+      el.scrollLeft += speed;
+      if (el.scrollLeft >= el.scrollWidth - el.clientWidth) {
+        el.scrollLeft = 0;
+      }
+      animId = requestAnimationFrame(scroll);
+    };
+    animId = requestAnimationFrame(scroll);
+
+    const pause = () => { speed = 0; };
+    const resume = () => { speed = 0.5; };
+    el.addEventListener('mouseenter', pause);
+    el.addEventListener('mouseleave', resume);
+    el.addEventListener('touchstart', pause);
+    el.addEventListener('touchend', resume);
+
+    return () => {
+      cancelAnimationFrame(animId);
+      el.removeEventListener('mouseenter', pause);
+      el.removeEventListener('mouseleave', resume);
+      el.removeEventListener('touchstart', pause);
+      el.removeEventListener('touchend', resume);
+    };
+  }, [pizzas]);
+
+  if (pizzas.length === 0) return null;
+
+  return (
+    <div className="relative mt-16 overflow-hidden">
+      {/* Gradient masks */}
+      <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-16 bg-gradient-to-r from-ink to-transparent" />
+      <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-16 bg-gradient-to-l from-ink to-transparent" />
+      <div
+        ref={scrollRef}
+        className="flex gap-5 overflow-x-hidden pb-4"
+        style={{ scrollBehavior: 'auto' }}
+      >
+        {/* Duplicate items for seamless looping */}
+        {[...pizzas, ...pizzas].map((pizza, i) => (
+          <Link
+            to="/menu"
+            key={`${pizza._id}-${i}`}
+            className="group flex-shrink-0 w-64 overflow-hidden rounded-2xl border border-line bg-card transition-all duration-300 hover:border-fire/30 hover:shadow-card"
+          >
+            <div className="relative h-36 overflow-hidden">
+              <img
+                src={pizza.image}
+                alt={pizza.name}
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-card/90 via-transparent to-transparent" />
+              <span className={`absolute left-3 top-3 rounded-full px-2.5 py-0.5 text-[10px] font-bold backdrop-blur-md ${
+                pizza.category === 'non-veg' ? 'bg-danger/80 text-white' :
+                pizza.category === 'vegan' ? 'bg-emerald-600/80 text-white' :
+                'bg-success/80 text-white'
+              }`}>
+                {pizza.category.toUpperCase()}
+              </span>
+            </div>
+            <div className="p-4">
+              <div className="flex items-start justify-between gap-2">
+                <h3 className="font-display text-sm font-bold leading-tight">{pizza.name}</h3>
+                <span className="shrink-0 text-sm font-bold text-amber">{money(pizza.basePrice)}</span>
+              </div>
+              <p className="mt-1.5 text-[11px] leading-4 text-muted line-clamp-2">{pizza.description}</p>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function Landing() {
   return (
@@ -43,7 +139,7 @@ export default function Landing() {
           </motion.p>
           <motion.div className="mt-9 flex flex-wrap gap-3" {...fade(0.3)}>
             <Link to="/register" className="btn-primary">Start your order</Link>
-            <Link to="/login" className="btn-secondary">I have an account</Link>
+            <Link to="/menu" className="btn-secondary">Browse menu</Link>
           </motion.div>
           <motion.div className="mt-12 flex gap-10 border-t border-line pt-6" {...fade(0.4)}>
             {stats.map(({ value, label }) => (
@@ -71,8 +167,22 @@ export default function Landing() {
         </motion.div>
       </section>
 
+      {/* Auto-Scroll Pizza Menu */}
+      <section className="border-y border-line/50 bg-surface/30 py-16">
+        <div className="container-app">
+          <motion.p className="eyebrow" {...fade()}>Fresh from the oven</motion.p>
+          <motion.h2 className="section-heading" {...fade(0.1)}>Popular Picks.</motion.h2>
+          <motion.p className="mt-3 text-muted" {...fade(0.15)}>
+            Swipe through our best-selling pizzas — click any to order.
+          </motion.p>
+        </div>
+        <div className="container-app">
+          <AutoScrollCarousel />
+        </div>
+      </section>
+
       {/* Features */}
-      <section className="border-y border-line/50 bg-surface/30 py-24">
+      <section className="py-24">
         <div className="container-app">
           <motion.p className="eyebrow" {...fade()}>How it works</motion.p>
           <motion.h2 className="section-heading" {...fade(0.1)}>From idea to door.</motion.h2>
@@ -95,7 +205,7 @@ export default function Landing() {
       </section>
 
       {/* CTA */}
-      <section className="py-24">
+      <section className="border-t border-line/50 bg-surface/30 py-24">
         <div className="container-app text-center">
           <motion.h2
             className="mx-auto max-w-2xl font-display text-4xl font-bold tracking-tight sm:text-5xl"
