@@ -1,96 +1,284 @@
-# PizzaApp
+<p align="center">
+  <img src="https://em-content.zobj.net/source/apple/391/pizza_1f355.png" width="80" alt="PizzaApp Logo" />
+</p>
 
-A full-stack pizza delivery application built with React, Vite, Tailwind CSS, Express, MongoDB, Razorpay test mode, and Gmail SMTP.
+<h1 align="center">🍕 PizzaApp — Full-Stack Pizza Delivery</h1>
 
-## Features
+<p align="center">
+  <strong>A production-grade pizza ordering platform with live pizza builder, Razorpay payments, real-time order tracking, and a full admin dashboard.</strong>
+</p>
 
-- Email verification, password reset, short-lived access tokens, and httpOnly refresh cookies
-- Six seeded menu pizzas and 26 inventory-backed custom ingredients
-- Five-stage visual pizza builder with live SVG preview and server-authoritative pricing
-- Razorpay test checkout with signature verification and idempotent order confirmation
-- Transactional inventory deduction, low-stock email alerts, and hourly stock monitoring
-- User order history with an 8-second live status poller
-- Admin statistics, legal order status transitions, filtering, and inline inventory editing
-- Responsive premium dark UI with Tailwind and Framer Motion
+<p align="center">
+  <a href="https://oibsip-app-blush-seven.vercel.app">🌐 Live Demo</a> &nbsp;·&nbsp;
+  <a href="https://github.com/AEVILOP">👤 GitHub</a> &nbsp;·&nbsp;
+  <a href="https://linkedin.com/in/anirban-banerjee">💼 LinkedIn</a>
+</p>
 
-## Requirements
+<p align="center">
+  <img src="https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=white" alt="React" />
+  <img src="https://img.shields.io/badge/Node.js-20+-339933?style=flat-square&logo=node.js&logoColor=white" alt="Node.js" />
+  <img src="https://img.shields.io/badge/MongoDB-Atlas-47A248?style=flat-square&logo=mongodb&logoColor=white" alt="MongoDB" />
+  <img src="https://img.shields.io/badge/Razorpay-Test_Mode-3395FF?style=flat-square&logo=razorpay&logoColor=white" alt="Razorpay" />
+  <img src="https://img.shields.io/badge/Vercel-Deployed-000?style=flat-square&logo=vercel&logoColor=white" alt="Vercel" />
+  <img src="https://img.shields.io/badge/Render-Backend-46E3B7?style=flat-square&logo=render&logoColor=white" alt="Render" />
+</p>
 
-- Node.js 20 or newer
-- A free MongoDB Atlas cluster
-- A Gmail account with 2-Step Verification and an App Password
-- A Razorpay account with test keys
+---
 
-## Local Setup
+## 📸 Preview
 
-1. Install dependencies:
+| Home Page | Menu + Pagination | Pizza Builder |
+|:---------:|:-----------------:|:-------------:|
+| Auto-scrolling carousel of popular pizzas | Filter by category, 8 items/page | Drag-and-drop ingredient selection |
 
-   ```powershell
-   npm install
-   ```
+| Checkout (GST Invoice) | Order Tracking | Admin Dashboard |
+|:----------------------:|:--------------:|:---------------:|
+| Subtotal, GST 5%, platform fee, delivery | Real-time status updates | Revenue analytics & order management |
 
-2. Create the environment file:
+---
 
-   ```powershell
-   Copy-Item .env.example .env
-   ```
+## ✨ Features
 
-3. Fill in `.env`. Generate each JWT secret with at least 64 random characters. Set `ADMIN_EMAIL` to the email that should receive stock alerts and own the admin account.
+### 🛒 Customer Side
+- **30+ Menu Items** — 20 pizzas (Veg, Non-Veg, Vegan), 5 drinks, 5 combo deals
+- **Live Pizza Builder** — Choose base, sauce, cheese, and toppings with real-time visual preview
+- **Smart Pagination** — 8 items per page with animated transitions and category filters
+- **Auto-Scroll Carousel** — Homepage showcases popular pizzas in an infinite-scroll ribbon
+- **Realistic Billing** — GST (5%), platform fee (₹10), conditional delivery charges (free above ₹499)
+- **Razorpay Payments** — Integrated test-mode checkout (no real charges)
+- **Order Tracking** — Real-time status: Confirmed → Preparing → Out for Delivery → Delivered
+- **Responsive Design** — Dark theme, glassmorphism, Framer Motion animations
 
-4. Start both applications:
+### 🔐 Authentication & Security
+- **JWT Authentication** — Access tokens (15min) + refresh tokens (7 days, httpOnly cookie)
+- **Auto-login after signup** — Seamless onboarding, no email verification friction
+- **Password validation** — Min 8 chars, uppercase, number, special character with strength meter
+- **Role-based access** — Separate `user` and `admin` roles
+- **Security middleware** — Helmet, CORS, rate limiting, mongo sanitization
 
-   ```powershell
-   npm run dev
-   ```
+### 👨‍💼 Admin Panel
+- **Dashboard** — Revenue stats, order counts, at-a-glance metrics
+- **Order Management** — View all orders, update status through the delivery pipeline
+- **Inventory Control** — Manage ingredient stock levels, availability toggles
+- **Low Stock Alerts** — Automated email notifications when ingredients run low
 
-The client runs at `http://localhost:5173`; the API runs at `http://localhost:5000`.
+---
 
-Collections are seeded automatically when empty. The first verified account registered with the exact `ADMIN_EMAIL` value receives the `admin` role. Other accounts receive the `user` role.
+## 🏗️ Tech Stack
 
-## Test Payment
+| Layer | Technology |
+|-------|-----------|
+| **Frontend** | React 19, Vite, Tailwind CSS, Framer Motion |
+| **Backend** | Node.js, Express.js, Mongoose |
+| **Database** | MongoDB Atlas |
+| **Payments** | Razorpay (Test Mode) |
+| **Auth** | JWT (Access + Refresh tokens), bcryptjs |
+| **Email** | Nodemailer + Gmail App Passwords |
+| **Hosting** | Vercel (Frontend) + Render (Backend) |
 
-Keep Razorpay in **Test Mode** and place the test Key ID and Secret in `.env`. The checkout displays Razorpay's test interface and does not charge real money. Order creation requires a valid Razorpay payment signature.
+---
 
-## Useful Commands
+## 📁 Project Structure
 
-```powershell
-npm run dev
-npm run build
-npm run start
-npm run seed
+```
+pizza-app/
+├── client/                    # React Frontend (Vite)
+│   ├── src/
+│   │   ├── components/        # Reusable UI components
+│   │   │   ├── Layout.jsx     # App shell with navbar + footer
+│   │   │   ├── Navbar.jsx     # Navigation with auth state
+│   │   │   ├── PizzaPreview.jsx # Live pizza visual builder
+│   │   │   ├── RazorpayCheckout.jsx
+│   │   │   ├── PrivateRoute.jsx
+│   │   │   └── Loading.jsx
+│   │   ├── pages/
+│   │   │   ├── Landing.jsx    # Home with auto-scroll carousel
+│   │   │   ├── Menu.jsx       # Paginated menu with filters
+│   │   │   ├── Builder.jsx    # Custom pizza builder
+│   │   │   ├── Checkout.jsx   # GST billing + Razorpay
+│   │   │   ├── Orders.jsx     # Order history
+│   │   │   ├── OrderDetail.jsx
+│   │   │   ├── AuthPages.jsx  # Login, Register, Forgot/Reset
+│   │   │   ├── AdminDashboard.jsx
+│   │   │   ├── AdminOrders.jsx
+│   │   │   └── AdminInventory.jsx
+│   │   ├── context/           # React Context (Auth, Checkout)
+│   │   └── utils/             # Axios config, formatters
+│   └── vercel.json            # SPA routing config
+│
+├── server/                    # Express Backend
+│   ├── controllers/           # Route handlers
+│   │   ├── authController.js
+│   │   ├── orderController.js
+│   │   ├── catalogController.js
+│   │   └── adminController.js
+│   ├── models/                # Mongoose schemas
+│   │   ├── User.js
+│   │   ├── Order.js
+│   │   ├── PizzaVariety.js
+│   │   └── Ingredient.js
+│   ├── middleware/             # Auth, validation, error handling
+│   ├── routes/                # Express routers
+│   ├── utils/                 # Tokens, email, seed data
+│   └── index.js               # Server entry point
+│
+├── .env.example               # Environment template
+├── render.yaml                # Render deployment config
+└── package.json               # Root scripts
 ```
 
-## Deployment
+---
 
-### Backend on Render
+## 🚀 Getting Started
 
-1. Create a free Web Service from this repository.
-2. Use `npm install` as the build command and `node server/index.js` as the start command.
-3. Add all server variables from `.env.example`.
-4. Set `NODE_ENV=production` and `CLIENT_URL=https://your-client.vercel.app`.
-5. Use `/api/health` as the health check.
+### Prerequisites
 
-MongoDB transactions require a replica set; MongoDB Atlas supplies this automatically.
+- **Node.js** ≥ 20
+- **MongoDB Atlas** account ([free tier](https://www.mongodb.com/cloud/atlas))
+- **Razorpay** test account ([dashboard](https://dashboard.razorpay.com/))
+- **Gmail App Password** ([generate one](https://myaccount.google.com/apppasswords))
 
-### Frontend on Vercel
+### 1. Clone the repository
 
-1. Import the repository and set the root directory to `client`.
-2. Use `npm run build` and output directory `dist`.
-3. Set `VITE_API_URL=https://your-api.onrender.com`.
-4. Redeploy after changing `VITE_API_URL`.
+```bash
+git clone https://github.com/AEVILOP/OIBSIP_Web-Devlopment-and-Designing_Level3.git
+cd OIBSIP_Web-Devlopment-and-Designing_Level3
+```
 
-`client/vercel.json` keeps React Router routes working on direct navigation. Production cookies use `Secure`, `httpOnly`, and `SameSite=None` because Vercel and Render are separate sites; local cookies use `SameSite=Lax`.
+### 2. Install dependencies
 
-## API Summary
+```bash
+# Root + Server dependencies
+npm install
 
-- `/api/auth` registration, verification, login, refresh, logout, and password recovery
-- `/api/catalog` menu pizzas and ingredients
-- `/api/orders` Razorpay creation, confirmation, user history, detail, and admin status update
-- `/api/admin` stats, all orders, and inventory management
-- `/api/health` deployment health check
+# Client dependencies
+cd client && npm install && cd ..
+```
 
-## Production Notes
+### 3. Configure environment
 
-- Configure only one trusted frontend origin in `CLIENT_URL`, or provide a comma-separated allowlist.
-- Gmail failures are logged and never crash request handling.
-- Refresh tokens and one-time email tokens are stored as SHA-256 hashes.
-- The in-memory six-hour alert throttle resets when the Render instance restarts, which is appropriate for this free-tier deployment.
+```bash
+cp .env.example .env
+```
+
+Edit `.env` with your credentials:
+
+```env
+PORT=5000
+NODE_ENV=development
+
+MONGODB_URI=mongodb+srv://<user>:<pass>@cluster.mongodb.net/pizzaapp
+ACCESS_TOKEN_SECRET=<random-64-char-string>
+REFRESH_TOKEN_SECRET=<random-64-char-string>
+ACCESS_TOKEN_EXPIRY=15m
+REFRESH_TOKEN_EXPIRY=7d
+
+GMAIL_USER=your@gmail.com
+GMAIL_APP_PASSWORD=xxxx xxxx xxxx xxxx
+
+RAZORPAY_KEY_ID=rzp_test_XXXXXXXXX
+RAZORPAY_KEY_SECRET=XXXXXXXXXXXXXXXXXX
+
+CLIENT_URL=http://localhost:5173
+ADMIN_EMAIL=your@gmail.com
+VITE_API_URL=http://localhost:5000
+```
+
+### 4. Run the app
+
+```bash
+# Terminal 1 — Start the backend (auto-seeds 30 menu items)
+cd server && npm run dev
+
+# Terminal 2 — Start the frontend
+cd client && npm run dev
+```
+
+Open **http://localhost:5173** and start ordering! 🍕
+
+---
+
+## 🌐 Deployment
+
+### Frontend → Vercel
+
+1. Import the GitHub repo on [vercel.com](https://vercel.com)
+2. Set **Root Directory** to `client`
+3. Add env variable: `VITE_API_URL` = your Render backend URL
+4. Deploy!
+
+### Backend → Render
+
+1. Create a **Web Service** on [render.com](https://render.com)
+2. Set **Root Directory** to `server`
+3. **Build Command**: `npm install`
+4. **Start Command**: `npm start`
+5. Add all `.env` variables (MongoDB, JWT, Razorpay, Gmail, CLIENT_URL)
+6. Deploy!
+
+---
+
+## 🔑 API Endpoints
+
+### Auth (`/api/auth`)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/register` | Create a new account |
+| POST | `/login` | Log in & receive JWT |
+| POST | `/refresh-token` | Refresh access token |
+| POST | `/logout` | Invalidate session |
+| POST | `/forgot-password` | Send reset email |
+| POST | `/reset-password` | Reset with token |
+
+### Catalog (`/api/catalog`)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/pizzas` | Get all menu items |
+| GET | `/ingredients` | Get all ingredients |
+
+### Orders (`/api/orders`)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/create` | Create Razorpay order |
+| POST | `/verify` | Verify payment & save |
+| GET | `/my-orders` | User's order history |
+| GET | `/:id` | Single order details |
+
+### Admin (`/api/admin`)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/stats` | Dashboard metrics |
+| GET | `/orders` | All orders |
+| PATCH | `/orders/:id/status` | Update order status |
+| PATCH | `/inventory/:id` | Update ingredient stock |
+
+---
+
+## 🧪 Test Credentials
+
+**Razorpay Test Card:**
+- Card Number: `4111 1111 1111 1111`
+- Expiry: Any future date
+- CVV: Any 3 digits
+- OTP: `1234`
+
+---
+
+## 👨‍💻 Author
+
+**Anirban Banerjee**
+
+- GitHub: [@AEVILOP](https://github.com/AEVILOP)
+- LinkedIn: [Anirban Banerjee](https://linkedin.com/in/anirban-banerjee)
+
+---
+
+## 📄 License
+
+This project is part of the **Oasis Infobyte** Web Development & Designing Internship (Level 3).
+
+---
+
+<p align="center">
+  Made with ❤️ and 🍕 by <a href="https://github.com/AEVILOP">Anirban Banerjee</a>
+</p>
