@@ -64,10 +64,12 @@ api.interceptors.response.use(
   },
 );
 
-export const apiError = (error, fallback = 'Unable to complete that request') => (
-  error.response?.data?.error
-  || error.response?.data?.details?.[0]?.message
-  || fallback
-);
+export const apiError = (error, fallback = 'Unable to complete that request') => {
+  const data = error.response?.data;
+  if (data?.error === 'Validation failed' && data?.details?.[0]?.message) {
+    return data.details[0].message;
+  }
+  return data?.error || data?.details?.[0]?.message || fallback;
+};
 
 export default api;
